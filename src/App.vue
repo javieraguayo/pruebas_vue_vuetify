@@ -9,20 +9,7 @@
       <v-toolbar-title>Wemfi</v-toolbar-title>
 
       <v-spacer></v-spacer>
-
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
+      
     </v-app-bar>
    
 
@@ -48,13 +35,14 @@
           v-for="item in items"
           :key="item.title"
           link
+          @click="$router.push({ path: item.route })"
         >
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
 
           <v-list-item-content>
-            <v-list-item-title><router-link :to="{ name: item.title, params: {placeName: item.route } }">{{ item.title }}</router-link></v-list-item-title>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>

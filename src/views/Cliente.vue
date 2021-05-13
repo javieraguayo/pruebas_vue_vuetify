@@ -1,6 +1,5 @@
 <template>
   <v-container>
-    <h1>pagina de clientes</h1>
    <Table/>
   </v-container>
 </template>
