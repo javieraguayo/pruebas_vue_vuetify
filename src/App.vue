@@ -1,23 +1,12 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-     <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Wemfi</v-toolbar-title>
-
+    <v-app-bar app color="primary" dark>
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-toolbar-title id="title-app">Wemfi</v-toolbar-title>
       <v-spacer></v-spacer>
-      
     </v-app-bar>
-   
 
-    <v-navigation-drawer
-      v-model="drawer"
-      absolute
-      temporary
-    >
+    <v-navigation-drawer v-model="drawer" absolute temporary>
       <v-list-item>
         <v-list-item-avatar>
           <v-img src="https://randomuser.me/api/portraits/men/78.jpg"></v-img>
@@ -47,10 +36,9 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    
 
     <v-main>
-        <router-view/>
+      <router-view />
     </v-main>
   </v-app>
 </template>
@@ -59,18 +47,26 @@
 /* import HelloWorld from './components/HelloWorld'; */
 
 export default {
-  name: 'App',
-  components: {
-    
-  },
+  name: "App",
+  components: {},
   data: () => ({
-    drawer : false,
+    drawer: false,
     items: [
-          { title: 'Asesores', icon: 'mdi-account-group', route : '/asesores' },
-          { title: 'Clientes', icon: 'mdi-account-group', route : '/clientes'},
-          { title: 'Inversionistas', icon: 'mdi-account-group', route : '/inversionistas'},
-        ],
+      { title: "Asesores", icon: "mdi-account-group", route: "/asesores" },
+      { title: "Clientes", icon: "mdi-account-group", route: "/clientes" },
+      {
+        title: "Inversionistas",
+        icon: "mdi-account-group",
+        route: "/inversionistas",
+      },
+    ],
   }),
 };
 </script>
+
+<style>
+#title-app {
+  font-family: "Lobster", cursive;
+}
+</style>
 
