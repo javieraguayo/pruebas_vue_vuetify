@@ -1,21 +1,24 @@
 <template>
-  <v-container>
+  <div>
+    <Header/>
    <Table/>
-  </v-container>
+   <Footer/>
+  </div>
 </template>
 
 <script>
+import Table from "@/components/Table";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
-  import Table from '@/components/Table';
+export default {
+  name: "Cliente",
+  components: {
+    Header,
+    Footer,
+    Table,
+  },
 
-  export default {
-    name: 'Cliente',
-    components : {
-     Table
-    },
-
-    data: () => ({
-    
-    }),
-  }
+  data: () => ({}),
+};
 </script>

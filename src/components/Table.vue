@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-card>
+    <v-card class="mx-5 mt-3">
       <v-card-title>
         <v-icon class="mr-2" large>mdi-account-group</v-icon>Clientes
         <v-spacer></v-spacer>
@@ -227,6 +227,7 @@
 export default {
   data() {
     return {
+      name : "Table",
       search: "",
       expanded: [],
       dialog: false,
