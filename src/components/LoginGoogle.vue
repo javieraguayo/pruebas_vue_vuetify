@@ -16,6 +16,7 @@ export default {
   },
   data() {
     return {
+      // url autorizada http://localhost:8080
       // client_id is the only required property but you can add several more params, full list down bellow on the Auth api section
       params: {
         client_id:
@@ -35,6 +36,9 @@ export default {
 
       // This only gets the user information: id, name, imageUrl and email
       console.log(googleUser.getBasicProfile());
+    },
+    onFailure(googleUser) {
+      console.log(googleUser);
     },
   },
 };

@@ -17,20 +17,21 @@
                 <v-tab ripple>Ingreso</v-tab>
                 <v-tab-item>
                   <v-card-text>
-                    <LoginGoogle/>
-                    <v-form>
+                    <LoginGoogle />
+                    <v-form @submit.prevent="login" id="login-form">
                       <v-text-field
                         prepend-icon="mdi-at"
                         name="Email"
                         label="Email"
                         type="email"
+                        v-model="email"
                       ></v-text-field>
                       <v-text-field
                         prepend-icon="mdi-lock"
                         name="password"
                         label="Contraseña"
-                        id="password"
                         type="password"
+                        v-model="password"
                       ></v-text-field>
                       <v-checkbox v-model="checkbox">
                         <template v-slot:label>
@@ -41,7 +42,7 @@
                   </v-card-text>
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="success" block
+                    <v-btn type="submit" color="success" block form="login-form"
                       ><v-icon small class="mr-1">mdi-login</v-icon
                       >Acceder</v-btn
                     >
@@ -51,30 +52,34 @@
                 <v-tab ripple>Registro</v-tab>
                 <v-tab-item>
                   <v-card-text>
-                    <v-form>
+                    <v-form @submit.prevent="signup" id="register-form">
                       <v-text-field
                         prepend-icon="mdi-account"
                         name="nombre"
                         label="Nombre"
-                        type="email"
+                        type="text"
+                        v-model="sunombre"
                       ></v-text-field>
                       <v-text-field
                         prepend-icon="mdi-account"
                         name="apellido"
                         label="Apellido"
-                        type="email"
+                        type="text"
+                        v-model="suapellido"
                       ></v-text-field>
                       <v-text-field
                         prepend-icon="mdi-phone"
                         name="telefono"
                         label="Telefono"
-                        type="email"
+                        type="number"
+                        v-model="sutelefono"
                       ></v-text-field>
                       <v-text-field
                         prepend-icon="mdi-at"
                         name="email"
                         label="Email"
                         type="text"
+                        v-model="suemail"
                       ></v-text-field>
                       <v-text-field
                         prepend-icon="mdi-lock"
@@ -82,6 +87,7 @@
                         label="Contraseña"
                         id="password"
                         type="password"
+                        v-model="supassword"
                       ></v-text-field>
                       <v-text-field
                         prepend-icon="mdi-lock"
@@ -89,12 +95,19 @@
                         label="Repetir Contraseña"
                         id="repeat-password"
                         type="password"
+                        v-model="surepeatpassword"
                       ></v-text-field>
                     </v-form>
                   </v-card-text>
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="success" block>Registrarse</v-btn>
+                    <v-btn
+                      type="submit"
+                      color="success"
+                      block
+                      form="register-form"
+                      >Registrarse</v-btn
+                    >
                   </v-card-actions>
                 </v-tab-item>
               </v-tabs>
@@ -107,18 +120,75 @@
 </template>
 
 <script>
-
-import LoginGoogle from '../components/LoginGoogle';
+import LoginGoogle from "../components/LoginGoogle";
 
 export default {
   name: "Login",
-  components : {
-    LoginGoogle
+  components: {
+    LoginGoogle,
   },
   data: () => ({
     active: null,
     checkbox: true,
+    //login
+    email: "",
+    password: "",
+    //registro
+    sunombre: "",
+    suapellido: "",
+    sutelefono: "",
+    suemail: "",
+    supassword: "",
+    surepeatpassword: "",
+
+    error: false,
+    error_msg: "",
   }),
+  methods: {
+    login() {
+      let json = {
+        email: this.email,
+        password: this.password,
+      };
+
+      console.log(json);
+
+      fetch("url", {
+        method: "POST",
+        body: JSON.stringify(json),
+        headers: { "Content-type": "application/json; charset=UTF-8" },
+      })
+        .then(function (data) {
+          console.log(data);
+        })
+        .catch(function (err) {
+          console.error(err);
+        });
+    },
+    signup() {
+      let json = {
+        nombre: this.sunombre,
+        apellido: this.suapellido,
+        telefono: this.sutelefono,
+        email: this.suemail,
+        password: this.supassword,
+      };
+
+      console.log(json);
+
+      fetch("url", {
+        method: "POST",
+        body: JSON.stringify(json),
+        headers: { "Content-type": "application/json; charset=UTF-8" },
+      })
+        .then(function (data) {
+          console.log(data);
+        })
+        .catch(function (err) {
+          console.error(err);
+        });
+    },
+  },
 };
 </script>
 
