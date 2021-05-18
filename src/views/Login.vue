@@ -17,6 +17,7 @@
                 <v-tab ripple>Ingreso</v-tab>
                 <v-tab-item>
                   <v-card-text>
+                    <LoginGoogle/>
                     <v-form>
                       <v-text-field
                         prepend-icon="mdi-at"
@@ -106,8 +107,14 @@
 </template>
 
 <script>
+
+import LoginGoogle from '../components/LoginGoogle';
+
 export default {
   name: "Login",
+  components : {
+    LoginGoogle
+  },
   data: () => ({
     active: null,
     checkbox: true,
