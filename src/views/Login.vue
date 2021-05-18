@@ -1,6 +1,11 @@
 <template>
   <v-app id="inspire">
     <v-main>
+      <div class="float-right">
+        <v-alert type="success">Credenciales correctas</v-alert>
+        <v-alert type="error">Credenciales incorrectas</v-alert>
+      </div>
+
       <v-container fluid fill-height>
         <v-layout align-center justify-center>
           <v-flex xs12 sm8 md4>
@@ -111,8 +116,8 @@ export default {
 </script>
 
 <style>
-div[data-app='true'] {
-  background: url('../assets/blue-snow/blue-snow.png') repeat fixed !important;
+div[data-app="true"] {
+  background: url("../assets/blue-snow/blue-snow.png") repeat fixed !important;
   background-size: cover;
 }
 </style>
