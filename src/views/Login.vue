@@ -1,11 +1,6 @@
 <template>
   <v-app id="inspire">
     <v-main>
-      <div class="float-right">
-        <v-alert type="success">Credenciales correctas</v-alert>
-        <v-alert type="error">Credenciales incorrectas</v-alert>
-      </div>
-
       <v-container fluid fill-height>
         <v-layout align-center justify-center>
           <v-flex xs12 sm8 md4>
@@ -18,13 +13,21 @@
                 <v-tab-item>
                   <v-card-text>
                     <LoginGoogle />
-                    <v-form @submit.prevent="login" id="login-form">
+                    <v-form
+                      @submit.prevent="login"
+                      id="login-form"
+                      ref="validlogin"
+                      v-model="validlogin"
+                      lazy-validation
+                    >
                       <v-text-field
                         prepend-icon="mdi-at"
                         name="Email"
                         label="Email"
                         type="email"
                         v-model="email"
+                        :rules="emailRules"
+                        required
                       ></v-text-field>
                       <v-text-field
                         prepend-icon="mdi-lock"
@@ -32,6 +35,8 @@
                         label="Contraseña"
                         type="password"
                         v-model="password"
+                        :rules="passwordRules"
+                        required
                       ></v-text-field>
                       <v-checkbox v-model="checkbox">
                         <template v-slot:label>
@@ -40,9 +45,21 @@
                       </v-checkbox>
                     </v-form>
                   </v-card-text>
+                  <div class="mx-2 text-center">
+                    <v-alert type="error" v-if="error"
+                      >Credenciales incorrectas</v-alert
+                    >
+                  </div>
+
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn type="submit" color="success" block form="login-form"
+                    <v-btn
+                      type="submit"
+                      color="success"
+                      block
+                      form="login-form"
+                      @click="validatelogin"
+                      :disabled="!validlogin"
                       ><v-icon small class="mr-1">mdi-login</v-icon
                       >Acceder</v-btn
                     >
@@ -52,34 +69,43 @@
                 <v-tab ripple>Registro</v-tab>
                 <v-tab-item>
                   <v-card-text>
-                    <v-form @submit.prevent="signup" id="register-form">
+                    <v-form
+                      @submit.prevent="signup"
+                      id="register-form"
+                      ref="validregister"
+                      v-model="validregister"
+                      lazy-validation
+                    >
                       <v-text-field
                         prepend-icon="mdi-account"
                         name="nombre"
                         label="Nombre"
+                        :counter="20"
                         type="text"
                         v-model="sunombre"
+                        :rules="nombreRules"
+                        required
                       ></v-text-field>
+
                       <v-text-field
                         prepend-icon="mdi-account"
                         name="apellido"
                         label="Apellido"
+                        :counter="20"
                         type="text"
                         v-model="suapellido"
+                        :rules="suapellidoRules"
+                        required
                       ></v-text-field>
-                      <v-text-field
-                        prepend-icon="mdi-phone"
-                        name="telefono"
-                        label="Telefono"
-                        type="number"
-                        v-model="sutelefono"
-                      ></v-text-field>
+
                       <v-text-field
                         prepend-icon="mdi-at"
                         name="email"
                         label="Email"
-                        type="text"
+                        type="email"
                         v-model="suemail"
+                        :rules="emailRules"
+                        required
                       ></v-text-field>
                       <v-text-field
                         prepend-icon="mdi-lock"
@@ -88,6 +114,8 @@
                         id="password"
                         type="password"
                         v-model="supassword"
+                        :rules="passwordRules"
+                        required
                       ></v-text-field>
                       <v-text-field
                         prepend-icon="mdi-lock"
@@ -96,6 +124,8 @@
                         id="repeat-password"
                         type="password"
                         v-model="surepeatpassword"
+                        :rules="surepeatpasswordRules"
+                        required
                       ></v-text-field>
                     </v-form>
                   </v-card-text>
@@ -106,6 +136,8 @@
                       color="success"
                       block
                       form="register-form"
+                      @click="validateregistro"
+                      :disabled="!validregister"
                       >Registrarse</v-btn
                     >
                   </v-card-actions>
@@ -121,6 +153,7 @@
 
 <script>
 import LoginGoogle from "../components/LoginGoogle";
+/* import router from "../router"; */
 
 export default {
   name: "Login",
@@ -132,61 +165,107 @@ export default {
     checkbox: true,
     //login
     email: "",
+    emailRules: [
+      (v) => !!v || "Email es requerido",
+      (v) =>
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) ||
+        "E-mail debe ser valido",
+    ],
     password: "",
+    passwordRules: [(v) => !!v || "Contraseña es requerida"],
     //registro
     sunombre: "",
+    nombreRules: [
+      (v) => !!v || "Nombre es requerido",
+      (v) =>
+        (v && v.length <= 20) || "El nombre debe tener menos de 20 caracteres",
+    ],
     suapellido: "",
-    sutelefono: "",
+    suapellidoRules: [
+      (v) => !!v || "Apellido es requerido",
+      (v) =>
+        (v && v.length <= 20) ||
+        "El apellido debe tener menos de 20 caracteres",
+    ],
     suemail: "",
     supassword: "",
     surepeatpassword: "",
-
+    surepeatpasswordRules: [(v) => !!v || "Repetir contraseña es requerida"],
+    //errores
     error: false,
     error_msg: "",
+    //success
+    success: false,
+    //validacion de form
+    validlogin: true,
+    validregister: true,
   }),
+  created() {
+    setTimeout(() => {
+      this.alert = false;
+    }, 4000);
+  },
   methods: {
-    login() {
+    async login() {
       let json = {
         email: this.email,
         password: this.password,
       };
 
-      console.log(json);
-
-      fetch("url", {
+      fetch("https://wemfi.herokuapp.com/auth/sign-in", {
         method: "POST",
         body: JSON.stringify(json),
-        headers: { "Content-type": "application/json; charset=UTF-8" },
-      })
-        .then(function (data) {
-          console.log(data);
-        })
-        .catch(function (err) {
-          console.error(err);
-        });
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((response) => {
+        return response
+          .json()
+          .then((data) => {
+            var token = data.token;
+            localStorage.token = token;
+            console.log(token);
+            this.$router.push("/infocliente");
+          })
+          .catch((err) => {
+            console.log(err);
+            this.error = true;
+          });
+      });
     },
-    signup() {
+    async signup() {
       let json = {
-        nombre: this.sunombre,
-        apellido: this.suapellido,
-        telefono: this.sutelefono,
         email: this.suemail,
+        fullname: this.sunombre,
+        firstname: this.suapellido,
         password: this.supassword,
+        password_confirmation: this.surepeatpassword,
       };
 
       console.log(json);
 
-      fetch("url", {
+      fetch("https://wemfi.herokuapp.com/auth/register", {
         method: "POST",
         body: JSON.stringify(json),
-        headers: { "Content-type": "application/json; charset=UTF-8" },
-      })
-        .then(function (data) {
-          console.log(data);
-        })
-        .catch(function (err) {
-          console.error(err);
-        });
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((response) => {
+        if (response.status == 200) {
+          this.resetregistro();
+        } else {
+          alert("fallo");
+        }
+      });
+    },
+    validatelogin() {
+      this.$refs.validlogin.validate();
+    },
+    validateregistro() {
+      this.$refs.validregister.validate();
+    },
+    resetregistro() {
+      this.$refs.validregister.reset();
     },
   },
 };
