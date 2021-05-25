@@ -1,5 +1,5 @@
 <template>
-  <v-app id="inspire">
+  <v-app id="app">
     <v-main>
       <v-container fluid fill-height>
         <v-layout align-center justify-center>
@@ -58,14 +58,17 @@
                       color="success"
                       block
                       form="login-form"
-                      @click="validatelogin"
-                      :disabled="!validlogin"
+                      @click="
+                        validatelogin;
+                        loader = 'loading';
+                      "
+                      :disabled="isDisabledlogin"
+                      :loading="loading"
                       ><v-icon small class="mr-1">mdi-login</v-icon
                       >Acceder</v-btn
                     >
                   </v-card-actions>
                 </v-tab-item>
-
                 <v-tab ripple>Registro</v-tab>
                 <v-tab-item>
                   <v-card-text>
@@ -79,8 +82,8 @@
                       <v-text-field
                         prepend-icon="mdi-account"
                         name="nombre"
-                        label="Nombre"
-                        :counter="20"
+                        label="Nombre o Razón Social"
+                        :counter="40"
                         type="text"
                         v-model="sunombre"
                         :rules="nombreRules"
@@ -88,25 +91,67 @@
                       ></v-text-field>
 
                       <v-text-field
-                        prepend-icon="mdi-account"
+                        prepend-icon="mdi-card-account-details-outline"
                         name="apellido"
-                        label="Apellido"
-                        :counter="20"
-                        type="text"
+                        label="Nº de Identificación Fiscal - NIF"
+                        :counter="10"
+                        type="number"
                         v-model="suapellido"
-                        :rules="suapellidoRules"
+                        :rules="nifRules"
+                        required
+                      ></v-text-field>
+
+                      <v-text-field
+                        prepend-icon="mdi-map-marker"
+                        name="nombre"
+                        label="Domicilio Social"
+                        :counter="40"
+                        type="text"
+                        v-model="sunombre"
+                        :rules="domicilioRules"
+                        required
+                      ></v-text-field>
+
+                      <v-text-field
+                        prepend-icon="mdi-phone"
+                        name="nombre"
+                        label="Teléfono"
+                        :counter="9"
+                        type="number"
+                        v-model="sunombre"
+                        :rules="telefonoRules"
                         required
                       ></v-text-field>
 
                       <v-text-field
                         prepend-icon="mdi-at"
                         name="email"
-                        label="Email"
+                        label="Correo Electrónico de Contacto"
                         type="email"
                         v-model="suemail"
                         :rules="emailRules"
                         required
                       ></v-text-field>
+
+                      <v-text-field
+                        prepend-icon="mdi-account"
+                        name="nombre"
+                        label="Persona de Contacto"
+                        :counter="40"
+                        type="text"
+                        v-model="sunombre"
+                        :rules="personaRules"
+                        required
+                      ></v-text-field>
+
+                      <v-select
+                        prepend-icon="mdi-account"
+                        :items="items"
+                        label="Cargo de la Persona de Contacto"
+                        required
+                        :rules="cargopersonaRules"
+                      ></v-select>
+
                       <v-text-field
                         prepend-icon="mdi-lock"
                         name="password"
@@ -153,7 +198,6 @@
 
 <script>
 import LoginGoogle from "../components/LoginGoogle";
-/* import router from "../router"; */
 
 export default {
   name: "Login",
@@ -161,6 +205,8 @@ export default {
     LoginGoogle,
   },
   data: () => ({
+    items: ["Administrador", "Apoderado"],
+    select: null,
     active: null,
     checkbox: true,
     //login
@@ -171,6 +217,11 @@ export default {
         /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) ||
         "E-mail debe ser valido",
     ],
+    cargopersonaRules: [(v) => !!v || "Cargo es requerido"],
+    personaRules: [(v) => !!v || "Persona es requerida"],
+    telefonoRules: [(v) => !!v || "Telefóno es requerido"],
+    domicilioRules: [(v) => !!v || "Domicilio es requerido"],
+    nifRules: [(v) => !!v || "NIF es requerido"],
     password: "",
     passwordRules: [(v) => !!v || "Contraseña es requerida"],
     //registro
@@ -197,13 +248,29 @@ export default {
     //success
     success: false,
     //validacion de form
-    validlogin: true,
-    validregister: true,
+    validlogin: false,
+    validregister: false,
+    loader: null,
+    //loading btn login
+    loading: false,
+    //validacion disabled button login
+    isDisabledlogin: true,
   }),
+  watch: {
+    loader() {
+      const l = this.loader;
+      this[l] = !this[l];
+
+      setTimeout(() => (this[l] = false), 3000);
+
+      this.loader = null;
+    },
+  },
   created() {
-    setTimeout(() => {
-      this.alert = false;
-    }, 4000);
+    this.$multiwatch(['email', 'password'], function() {
+      const valid = this.$refs.validlogin.validate();
+      this.isDisabledlogin = !valid
+    })
   },
   methods: {
     async login() {

@@ -63,7 +63,5 @@ export default {
 </script>
 
 <style>
-#title-app {
-  font-family: "Lobster", cursive;
-}
+
 </style>
