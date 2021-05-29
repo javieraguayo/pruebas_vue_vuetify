@@ -11,7 +11,8 @@
           <v-img src="https://randomuser.me/api/portraits/men/78.jpg"></v-img>
         </v-list-item-avatar>
         <v-list-item-content>
-          <v-list-item-title>Nombre Usuario</v-list-item-title>
+          <v-list-item-title>{{nombre_negocio}}</v-list-item-title>
+        <v-list-item-subtitle>{{correo}}</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
       <v-divider></v-divider>
@@ -36,7 +37,7 @@
           </v-list-item-icon>
 
           <v-list-item-content>
-            <v-list-item-title>Logout</v-list-item-title>
+            <v-list-item-title>Salir</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -52,16 +53,46 @@ export default {
     items: [
       { title: "Clientes", icon: "mdi-account-group", route: "/clientes" },
     ],
+    correo : '',
+    nombre_negocio : '',
   }),
+  mounted: function () {
+    this.getusuario();
+  },
   methods: {
     logout() {
       localStorage.removeItem("token");
       this.$router.push("/login");
     },
+    getusuario() {
+      fetch("https://wemfi.herokuapp.com/auth/me", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("HTTP status " + response.status);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log(data);
+          this.correo = data.user.email;
+          this.nombre_negocio = data.user.user_detail.business_name;
+        });
+    },
   },
 };
 </script>
 
-<style>
+<style scoped>
 
+/* .v-list-item__subtitle{
+  word-wrap: break-word;
+}
+ */
+ 
 </style>

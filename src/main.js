@@ -2,6 +2,8 @@ import Vue from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify'
 import router from './router'
+//agregado
+import "./plugins/vuetify-money.js";
 
 Vue.config.productionTip = false
 

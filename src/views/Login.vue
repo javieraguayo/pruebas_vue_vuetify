@@ -85,7 +85,7 @@
                         label="Nombre o Razón Social"
                         :counter="40"
                         type="text"
-                        v-model="sunombre"
+                        v-model="nombre"
                         :rules="nombreRules"
                         required
                       ></v-text-field>
@@ -95,8 +95,8 @@
                         name="apellido"
                         label="Nº de Identificación Fiscal - NIF"
                         :counter="10"
-                        type="number"
-                        v-model="suapellido"
+                        type="text"
+                        v-model="nif"
                         :rules="nifRules"
                         required
                       ></v-text-field>
@@ -107,7 +107,7 @@
                         label="Domicilio Social"
                         :counter="40"
                         type="text"
-                        v-model="sunombre"
+                        v-model="domicilio"
                         :rules="domicilioRules"
                         required
                       ></v-text-field>
@@ -118,7 +118,7 @@
                         label="Teléfono"
                         :counter="9"
                         type="number"
-                        v-model="sunombre"
+                        v-model="telefono"
                         :rules="telefonoRules"
                         required
                       ></v-text-field>
@@ -139,17 +139,18 @@
                         label="Persona de Contacto"
                         :counter="40"
                         type="text"
-                        v-model="sunombre"
+                        v-model="persona_contacto"
                         :rules="personaRules"
                         required
                       ></v-text-field>
 
                       <v-select
                         prepend-icon="mdi-account"
-                        :items="items"
+                        :items="cargo"
                         label="Cargo de la Persona de Contacto"
                         required
                         :rules="cargopersonaRules"
+                        v-model="cargo_contacto"
                       ></v-select>
 
                       <v-text-field
@@ -174,6 +175,11 @@
                       ></v-text-field>
                     </v-form>
                   </v-card-text>
+                  <div class="mx-2 text-center">
+                    <v-alert type="error" v-if="error_register"
+                      >Hubo un error intenta mas tarde</v-alert
+                    >
+                  </div>
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
@@ -205,10 +211,12 @@ export default {
     LoginGoogle,
   },
   data: () => ({
-    items: ["Administrador", "Apoderado"],
+    cargo: ["Administrador", "Apoderado"],
     select: null,
     active: null,
     checkbox: true,
+    //error de registro
+    error_register: false,
     //login
     email: "",
     emailRules: [
@@ -224,8 +232,17 @@ export default {
     nifRules: [(v) => !!v || "NIF es requerido"],
     password: "",
     passwordRules: [(v) => !!v || "Contraseña es requerida"],
-    //registro
-    sunombre: "",
+    //registro v-model
+    nombre: "",
+    nif: "",
+    suemail: "",
+    domicilio: "",
+    telefono: null,
+    persona_contacto: "",
+    cargo_contacto: "",
+    supassword: "",
+    surepeatpassword: "",
+
     nombreRules: [
       (v) => !!v || "Nombre es requerido",
       (v) =>
@@ -238,9 +255,6 @@ export default {
         (v && v.length <= 20) ||
         "El apellido debe tener menos de 20 caracteres",
     ],
-    suemail: "",
-    supassword: "",
-    surepeatpassword: "",
     surepeatpasswordRules: [(v) => !!v || "Repetir contraseña es requerida"],
     //errores
     error: false,
@@ -255,6 +269,7 @@ export default {
     loading: false,
     //validacion disabled button login
     isDisabledlogin: true,
+    isDisabledregister: true,
   }),
   watch: {
     loader() {
@@ -267,10 +282,28 @@ export default {
     },
   },
   created() {
-    this.$multiwatch(['email', 'password'], function() {
+    this.$multiwatch(["email", "password"], function () {
       const valid = this.$refs.validlogin.validate();
-      this.isDisabledlogin = !valid
-    })
+      this.isDisabledlogin = !valid;
+    });
+
+    this.$multiwatch(
+      [
+        "nombre",
+        "nif",
+        "suemail",
+        "domicilio",
+        "telefono",
+        "persona_contacto",
+        "cargo_contacto",
+        "supassword",
+        "surepeatpassword",
+      ],
+      function () {
+        const valid = this.$refs.validregister.validate();
+        this.isDisabledregister = !valid;
+      }
+    );
   },
   methods: {
     async login() {
@@ -279,6 +312,9 @@ export default {
         password: this.password,
       };
 
+      this.logintoserve(json);
+    },
+    logintoserve(json) {
       fetch("https://wemfi.herokuapp.com/auth/sign-in", {
         method: "POST",
         body: JSON.stringify(json),
@@ -288,11 +324,21 @@ export default {
       }).then((response) => {
         return response
           .json()
-          .then((data) => {
+          .then( async (data) => {
             var token = data.token;
             localStorage.token = token;
             console.log(token);
-            this.$router.push("/infocliente");
+
+            let rol = await this.checkrol(token);
+            /* this.$router.push("/infocliente"); */
+            console.log(rol);
+            if(rol === 1){//admin
+              this.$router.push("/clientes");
+            } else { 
+              //usuario
+              this.$router.push("/infocliente");
+            }
+
           })
           .catch((err) => {
             console.log(err);
@@ -303,14 +349,18 @@ export default {
     async signup() {
       let json = {
         email: this.suemail,
-        fullname: this.sunombre,
-        firstname: this.suapellido,
+        fullname: this.nombre,
+        firstname: this.nombre,
+        business_name: this.nombre,
+        nif: this.nif,
+        address: this.domicilio,
+        phone: this.telefono,
+        contact_person: this.persona_contacto,
+        contact_person_position: this.cargo_contacto,
         password: this.supassword,
         password_confirmation: this.surepeatpassword,
       };
-
-      console.log(json);
-
+      
       fetch("https://wemfi.herokuapp.com/auth/register", {
         method: "POST",
         body: JSON.stringify(json),
@@ -318,10 +368,17 @@ export default {
           "Content-Type": "application/json",
         },
       }).then((response) => {
+   
         if (response.status == 200) {
-          this.resetregistro();
+          this.email = this.suemail;
+          this.password = this.supassword;
+          this.logintoserve({email: this.suemail,password: this.supassword})
         } else {
-          alert("fallo");
+          /*
+          to do
+          manejar el arreglo de errores
+           */
+          this.error_register = true;
         }
       });
     },
@@ -334,6 +391,27 @@ export default {
     resetregistro() {
       this.$refs.validregister.reset();
     },
+    async checkrol(token){
+
+      let rol = null;
+     await fetch("https://wemfi.herokuapp.com/auth/me", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+           Authorization: "Bearer " + token,
+        },
+      }).then((response) => {
+         return response.json()
+      })
+      .then((data) => {
+       rol = data.user.role_id;
+      })
+      .catch((error) =>{
+        console.log(error);
+      })
+
+      return rol;
+    }
   },
 };
 </script>

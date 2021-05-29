@@ -23,7 +23,7 @@
         :search="search"
         :items-per-page="10"
       >
-        <template v-slot:item.action="{ item }">
+        <template v-slot:item.action="">
           <div class="text-left">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
@@ -34,7 +34,7 @@
                   v-bind="attrs"
                   v-on="on"
                   class="mx-2"
-                  @click="dialog = true"
+                  @click="dialog = true; getdata()"
                 >
                   <v-icon>mdi-account-details</v-icon>
                 </v-btn>
@@ -42,8 +42,8 @@
               <span>Detalles</span>
             </v-tooltip>
             <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
+              <template v-slot:activator="">
+                <!-- <v-btn
                   icon
                   color="warning"
                   @click="sendRequest(item)"
@@ -52,14 +52,14 @@
                   v-on="on"
                 >
                   <v-icon>mdi-file-download</v-icon>
-                </v-btn>
+                </v-btn> -->
               </template>
               <span>Descargar</span>
             </v-tooltip>
           </div>
         </template>
         <template v-slot:expanded-item="{ headers }">
-          <td :colspan="headers.length">
+          <td :colspan="headers.length" >
             <div class="row sp-details text-center">
               <div class="col-3">
                 <div class="text--primary">
@@ -146,13 +146,21 @@
                     <thead>
                       <tr>
                         <th class="text-left">Item</th>
-                        <th class="text-left">Valor</th>
+                        <th class="text-left">2021</th>
+                        <th class="text-left">2020</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="item in cuentas" :key="item.text">
-                        <td>{{ item.text }}</td>
-                        <td>{{ item.value }}</td>
+                      <tr v-for="(item,index) in data_cliente.cuenta" :key="index">
+                        <td>{{item.label}}</td>
+                        <template v-if="Object.keys(item.value).length > 1">
+                          <td>{{item.value["2021"]}}</td>
+                          <td>{{item.value["2020"]}}</td>
+                        </template>
+                        <template v-else>
+                          <td>No hay datos</td>
+                          <td>No hay datos</td>
+                        </template>
                       </tr>
                     </tbody>
                   </template>
@@ -172,13 +180,21 @@
                     <thead>
                       <tr>
                         <th class="text-left">Item</th>
-                        <th class="text-left">Valor</th>
+                        <th class="text-left">2021</th>
+                        <th class="text-left">2020</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="item in balances" :key="item.text">
-                        <td>{{ item.text }}</td>
-                        <td>{{ item.value }}</td>
+                      <tr v-for="(item,index) in data_cliente.balance" :key="index">
+                        <td>{{item.label}}</td>
+                        <template v-if="Object.keys(item.value).length > 1">
+                          <td>{{item.value["2021"]}}</td>
+                          <td>{{item.value["2020"]}}</td>
+                        </template>
+                        <template v-else>
+                          <td>No hay datos</td>
+                          <td>No hay datos</td>
+                        </template>
                       </tr>
                     </tbody>
                   </template>
@@ -193,14 +209,27 @@
                     <thead>
                       <tr>
                         <th class="text-left">Item</th>
-                        <th class="text-left">Valor</th>
+                        <th class="text-left">Respuesta</th>
+                      
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="item in preguntas" :key="item.text">
-                        <td>{{ item.text }}</td>
+                      <tr v-for="(item,index) in data_cliente.preguntas" :key="index">
+                        <td>{{ JSON.stringify(item.pregunta1) }}</td>
                         <td>{{ item.value }}</td>
                       </tr>
+
+                      <!-- <tr v-for="item in data_cliente.pre" :key="item">
+                        <td>{{item.label}}</td>
+                        <template v-if="Object.keys(item.value).length > 1">
+                          <td>{{item.value["2021"]}}</td>
+                          <td>{{item.value["2020"]}}</td>
+                        </template>
+                        <template v-else>
+                          <td>No hay datos</td>
+                          <td>No hay datos</td>
+                        </template>
+                      </tr> -->
                     </tbody>
                   </template>
                 </v-simple-table>
@@ -225,6 +254,9 @@
 
 <script>
 export default {
+  mounted: function () {
+    this.getclientes();
+  },
   data() {
     return {
       name : "Table",
@@ -233,131 +265,19 @@ export default {
       dialog: false,
       footerProps: { "items-per-page-options": [15, 30, 50, 100] },
       headers: [
-        {
-          text: "Rut",
-          align: "left",
-          value: "rut",
-        },
-        { text: "Nombre", value: "nombre" },
-        { text: "Apellido", value: "apellido" },
-        { text: "Telefono", value: "telefono" },
-        { text: "Correo", value: "correo" },
+        
+        { text: "Nombre", value: "firstname" },
+        { text: "Apellido", value: "fullname" },
+        { text: "Correo", value: "email" },
         { text: "Acciones", value: "action" },
       ],
-      clientes: [
-        {
-          rut: "14286042-2",
-          nombre: "Montse",
-          apellido: "Bustos",
-          telefono: "+569776936749",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "10390068-9",
-          nombre: "Maximino",
-          apellido: "Solis",
-          telefono: "+54976898754",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "5008046-3",
-          nombre: "Andoni",
-          apellido: "Abad",
-          telefono: "+54932536473",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "14286043-2",
-          nombre: "Naia",
-          apellido: "Rodenas",
-          telefono: "+56964540671",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "24555294-7",
-          nombre: "Feliciano",
-          apellido: "Salvador",
-          telefono: "+54987456834",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "8453558-3",
-          nombre: "Nil",
-          apellido: "Castells",
-          telefono: "+54965758594",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "7945055-3",
-          nombre: "Mateo",
-          apellido: "Revuelta",
-          telefono: "+349765025038",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "15831415-0",
-          nombre: "Samuel",
-          apellido: "Flores",
-          telefono: "+34965748453",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "7935946-7",
-          nombre: "Jesus",
-          apellido: "Villaverde",
-          telefono: "+349755477321",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "15726094-8",
-          nombre: "Hugo",
-          apellido: "Alcala",
-          telefono: "+349772130769",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "15560943-8",
-          nombre: "Ernesto",
-          apellido: "Yague",
-          telefono: "+349642298713",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "15560921-6",
-          nombre: "Ernesto",
-          apellido: "Yague",
-          telefono: "+349642298713",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "14561943-1",
-          nombre: "Ernesto",
-          apellido: "Yague",
-          telefono: "+349642298713",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "12561943-8",
-          nombre: "Ernesto",
-          apellido: "Yague",
-          telefono: "+349642298713",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "14551943-8",
-          nombre: "Ernesto",
-          apellido: "Yague",
-          telefono: "+349642298713",
-          correo: "correo@gmail.com",
-        },
-        {
-          rut: "13565963-8",
-          nombre: "Ernesto",
-          apellido: "Yague",
-          telefono: "+349642298713",
-          correo: "correo@gmail.com",
-        },
-      ],
+      clientes: [],
+      data_cliente : {
+        cuenta : {},
+        balance : {},
+        preguntas: {}
+      },
+    
       tab: null,
       items: ["Cuenta de Resultados", "Balance de Situación", "Cuestionario"],
       text:
@@ -700,6 +620,54 @@ export default {
   methods: {
     sendRequest(rowData) {
       console.log(rowData);
+    },
+    getclientes(){
+      fetch("https://wemfi.herokuapp.com/v1/users", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+           Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      }).then((response) => {
+         return response.json()
+      })
+      .then((data) => {
+        console.log(data);
+        this.clientes = data.users;
+     
+      })
+      .catch((error) =>{
+        console.log(error);
+      })
+    },
+    getdata() {
+      //trae los datos de los clientes
+    console.log("entro a getdata");
+    const self = this;
+      fetch("https://wemfi.herokuapp.com/v1/users/2", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("HTTP status " + response.status);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          self.data_cliente.cuenta = data.user.user_data.json.cuenta;
+          self.data_cliente.balance = data.user.user_data.json.balance;
+          self.data_cliente.preguntas = data.user.user_data.json.preguntas;
+           this.$forceUpdate();
+
+           console.log(self.data_cliente);
+        }).catch(e => {
+          console.log(e);
+        })
+        
     },
   },
 };
